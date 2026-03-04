@@ -76,8 +76,14 @@ python streamvln/http_realworld_server_wheeltec.py \
     --num_frames 32 \
     --port 8909
 ```
-
 切换相机只需改 `--camera astra_s`，服务器会自动使用对应内参。
+
+### 步骤 1.5：用 curl 直接测试服务器：
+```bash
+curl -X POST http://115.190.160.32:8909/eval_vln \
+  -F "image=@/home/wheeltec/VLN/StreamVLN/realworld/test.jpg" \
+  -F 'json={"reset": true, "instruction": "Go to the chair."}'
+```
 
 ### 步骤 2：启动机器人驱动（Jetson）
 
@@ -85,21 +91,21 @@ python streamvln/http_realworld_server_wheeltec.py \
 source /opt/ros/humble/setup.bash
 
 # 相机驱动
-ros2 launch orbbec_camera gemini_336l.launch.py   # 或 astra.launch.py
+ros2 launch turn_on_wheeltec_robot wheeltec_camera.launch.py   # 或 astra.launch.py
 
 # 底盘驱动（发布 /odom，订阅 /cmd_vel）
-ros2 launch wheeltec_robot_bringup bringup.launch.py
+ros2 launch turn_on_wheeltec_robot turn_on_wheeltec_robot.launch.py
 ```
 
 ### 步骤 3：启动 VLN 客户端（Jetson）
 
 ```bash
-cd /path/to/StreamVLN/realworld
+cd /home/wheeltec/VLN/StreamVLN/realworld
 
 python wheeltec_vln_client.py \
-    --server http://<工作站IP>:8909/eval_vln \
+    --server http://115.190.160.32:8909/eval_vln \
     --camera gemini_336l \
-    --instruction "走到椅子前停下。"
+    --instruction "Go to the chair and stop."
 ```
 
 ---

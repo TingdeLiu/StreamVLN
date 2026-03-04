@@ -29,8 +29,8 @@ import PIL.Image as PIL_Image
 import requests
 import rclpy
 from cv_bridge import CvBridge
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from geometry_msgs.msg import Twist
-from message_filters import ApproximateTimeSynchronizer, Subscriber
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from sensor_msgs.msg import Image
@@ -227,15 +227,21 @@ class WheeltecVlnManager(Node):
         self.server_url  = server_url
         self.cam_cfg     = CAMERA_CONFIGS[camera]
 
-        # ── Synchronised RGB + Depth subscribers ─────────────────────────────
-        self._rgb_sub_raw   = Subscriber(self, Image, "/camera/color/image_raw")
-        self._depth_sub_raw = Subscriber(self, Image, "/camera/depth/image")
-        self._sync = ApproximateTimeSynchronizer(
-            [self._rgb_sub_raw, self._depth_sub_raw],
-            queue_size=5,
-            slop=0.10,
+        _sensor_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10,
         )
-        self._sync.registerCallback(self._rgb_depth_callback)
+
+        # ── RGB subscriber (always required) ─────────────────────────────────
+        self._rgb_sub = self.create_subscription(
+            Image, "/camera/color/image_raw", self._rgb_callback, _sensor_qos
+        )
+
+        # ── Depth subscriber (optional – enables collision check) ─────────────
+        self._depth_sub = self.create_subscription(
+            Image, "/camera/depth/image_raw", self._depth_callback, _sensor_qos
+        )
 
         # ── Odometry subscriber ───────────────────────────────────────────────
         self._odom_sub = self.create_subscription(
@@ -257,13 +263,12 @@ class WheeltecVlnManager(Node):
         self.should_plan  = False
 
     # ── Callbacks ─────────────────────────────────────────────────────────────
-    def _rgb_depth_callback(self, rgb_msg: Image, depth_msg: Image):
-        # ── RGB ──────────────────────────────────────────────────────────────
+    def _rgb_callback(self, rgb_msg: Image):
         rgb_rw_lock.acquire_write()
         self.rgb_image = self._bridge.imgmsg_to_cv2(rgb_msg, "bgr8")
         rgb_rw_lock.release_write()
 
-        # ── Depth: uint16 mm → float32 m ────────────────────────────────────
+    def _depth_callback(self, depth_msg: Image):
         depth_rw_lock.acquire_write()
         raw = self._bridge.imgmsg_to_cv2(depth_msg, "16UC1").astype(np.float32)
         raw /= 1000.0
