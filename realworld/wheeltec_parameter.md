@@ -131,7 +131,7 @@ cy         = 361.75
 | 方向 | 话题 | 消息类型 | 编码 / 说明 |
 |------|------|---------|------------|
 | 订阅 | `/camera/color/image_raw` | `sensor_msgs/Image` | `rgb8` |
-| 订阅 | `/camera/depth/image` | `sensor_msgs/Image` | `16UC1`（mm） |
+| 订阅 | `/camera/depth/image_raw` | `sensor_msgs/Image` | `16UC1`（mm） |
 | 订阅 | `/odom` | `nav_msgs/Odometry` | 轮式里程计，方向为四元数 |
 | 发布 | `/cmd_vel` | `geometry_msgs/Twist` | `linear.x`（m/s），`angular.z`（rad/s） |
 

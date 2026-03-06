@@ -189,7 +189,7 @@ def eval_vln():
         print("[server] empty action sequence – returning STOP")
         return jsonify({"action": [0]})
 
-    return jsonify({"action": action_seq.tolist()})
+    return jsonify({"action": list(action_seq)})
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

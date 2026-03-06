@@ -13,7 +13,7 @@ GPU 工作站（推理端）                    Jetson / 机器人端
 │   wheeltec.py                │      │                                  │
 │                              │      │  ROS2 话题订阅                   │
 │  StreamVLNForCausalLM        │ HTTP │  /camera/color/image_raw (RGB)   │
-│  VLNEvaluator.step()   ◄─────┼──────┤  /camera/depth/image (Depth)     │
+│  VLNEvaluator.step()   ◄─────┼──────┤  /camera/depth/image_raw (Depth)  │
 │                              │      │  /odom                           │
 │  :8909 /eval_vln             │      │                                  │
 │                              │      │  ROS2 话题发布                   │
@@ -33,7 +33,7 @@ GPU 工作站（推理端）                    Jetson / 机器人端
 | 运动控制 | Unitree SDK `/api/sport/request` | `geometry_msgs/Twist → /cmd_vel` |
 | 里程计 | `SportModeState`（直接 RPY 欧拉角） | `nav_msgs/Odometry`（四元数） |
 | RGB 话题 | `/camera/camera/color/image_raw` | `/camera/color/image_raw` |
-| 深度话题 | 禁用 | `/camera/depth/image`（启用，用于碰撞检测） |
+| 深度话题 | 禁用 | `/camera/depth/image_raw`（启用，用于碰撞检测） |
 | 图像同步 | 独立回调 | `ApproximateTimeSynchronizer` |
 | 最大线速度 | 1.0 m/s | 0.25 m/s |
 | 最大角速度 | 1.2 rad/s | 0.30 rad/s |
